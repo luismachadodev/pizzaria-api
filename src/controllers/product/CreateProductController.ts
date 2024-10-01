@@ -11,38 +11,38 @@ cloudinary.config({
 })
 
 class CreateProductController {
-  async handle (req: Request, res: Response) {
+  async handle(req: Request, res: Response) {
     const { name, price, description, category_id } = req.body;
-    
+
     const createProductService = new CreateProductService();
 
-    if (!req.files || Object.keys(req.files).length === 0) {
-      throw new Error("Error upload file image");
-    } else {
+    if (!req.files || !req.files['file']) {
+      return res.status(400).json({ message: "Error: no file uploaded" });
+    }
 
-      const file: UploadedFile = req.files['file']
+    const file: UploadedFile = req.files['file'] as UploadedFile;
 
+    try {
+      // Upload da imagem no Cloudinary
       const resultFile: UploadApiResponse = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream({}, function (error, result) {
-          if (error) {
-            reject(error)
-            return
-          }
-
-          resolve(result)
-        }).end(file.data)
-      })
-
+        cloudinary.uploader.upload_stream({}, (error, result) => {
+          if (error) return reject(error);
+          resolve(result as UploadApiResponse);
+        }).end(file.data);
+      });
 
       const product = await createProductService.execute({
         name,
         price,
         description,
         banner: resultFile.url,
-        category_id
+        category_id,
       });
-  
+
       return res.json(product);
+
+    } catch (error) {
+      return res.status(500).json({ message: "Error uploading image", error: error.message });
     }
   }
 }
