@@ -32,7 +32,6 @@ router.get("/me", isAuthenticated_1.isAuthenticated, new DetailUserController_1.
 router.post("/category", isAuthenticated_1.isAuthenticated, new CreateCategoryController_1.CreateCategoryController().handle);
 router.get("/category", isAuthenticated_1.isAuthenticated, new ListCategoryController_1.ListCategoryController().handle);
 // -- ROTAS PRODUCT --
-// router.post("/product", isAuthenticated, upload.single('file'), new CreateProductController().handle)
 router.post("/product", isAuthenticated_1.isAuthenticated, new CreateProductController_1.CreateProductController().handle);
 router.get("/category/product", isAuthenticated_1.isAuthenticated, new ListByCategoryController_1.ListByCategoryController().handle);
 // -- ROTAS ORDER --
