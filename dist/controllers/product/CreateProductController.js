@@ -22,17 +22,16 @@ class CreateProductController {
         return __awaiter(this, void 0, void 0, function* () {
             const { name, price, description, category_id } = req.body;
             const createProductService = new CreateProductService_1.CreateProductService();
-            if (!req.files || Object.keys(req.files).length === 0) {
-                throw new Error("Error upload file image");
+            if (!req.files || !req.files['file']) {
+                return res.status(400).json({ message: "Error: no file uploaded" });
             }
-            else {
-                const file = req.files['file'];
+            const file = req.files['file'];
+            try {
+                // Upload da imagem no Cloudinary
                 const resultFile = yield new Promise((resolve, reject) => {
-                    cloudinary_1.v2.uploader.upload_stream({}, function (error, result) {
-                        if (error) {
-                            reject(error);
-                            return;
-                        }
+                    cloudinary_1.v2.uploader.upload_stream({}, (error, result) => {
+                        if (error)
+                            return reject(error);
                         resolve(result);
                     }).end(file.data);
                 });
@@ -41,9 +40,12 @@ class CreateProductController {
                     price,
                     description,
                     banner: resultFile.url,
-                    category_id
+                    category_id,
                 });
                 return res.json(product);
+            }
+            catch (error) {
+                return res.status(500).json({ message: "Error uploading image", error: error.message });
             }
         });
     }
